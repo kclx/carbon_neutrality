@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人碳排放量计算器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #2ecc71;
+        }
+
+        .section-title {
+            font-size: 22px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '🌱';
+            margin-right: 10px;
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #34495e;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #2ecc71;
+            box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.1);
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .checkbox-item:hover {
+            border-color: #2ecc71;
+            background: #f0fff4;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 8px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .btn-calculate {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 30px;
+        }
+
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(46, 204, 113, 0.3);
+        }
+
+        .btn-calculate:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            display: none;
+            margin-top: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            border-radius: 15px;
+            color: white;
+        }
+
+        .result.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .total-emission {
+            font-size: 48px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .breakdown {
+            margin-top: 30px;
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .breakdown h3 {
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .breakdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .comparison {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .tip {
+            font-size: 13px;
+            color: #7f8c8d;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        .unit {
+            color: #95a5a6;
+            font-size: 14px;
+            margin-left: 5px;
+        }
+
+        .info-icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            background: #3498db;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 18px;
+            font-size: 12px;
+            cursor: help;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌍 个人碳排放量计算器</h1>
+            <p>了解您的碳足迹，从今天开始低碳生活</p>
+        </div>
+
+        <div class="content">
+            <form id="carbonForm">
+                <!-- 基本信息 -->
+                <div class="section">
+                    <h2 class="section-title">基本信息</h2>
+                    <div class="input-group">
+                        <div class="form-group">
+                            <label for="period">计算周期</label>
+                            <select id="period" required>
+                                <option value="7">一周</option>
+                                <option value="30" selected>一个月</option>
+                                <option value="365">一年</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="recycling">是否进行垃圾分类回收？</label>
+                            <select id="recycling" required>
+                                <option value="0.95">是，积极回收 (减排5%)</option>
+                                <option value="1.0" selected>偶尔回收</option>
+                                <option value="1.05">否，不回收 (增排5%)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1. 饮食排放 -->
+                <div class="section">
+                    <h2 class="section-title">饮食情况</h2>
+                    <p class="tip">请填写平均每天的食物消耗量（克）</p>
+
+                    <div class="input-group">
+                        <div class="form-group">
+                            <label for="beef">牛肉 <span class="unit">克/天</span></label>
+                            <input type="number" id="beef" min="0" value="0" step="10">
+                        </div>
+                        <div class="form-group">
+                            <label for="pork">猪肉 <span class="unit">克/天</span></label>
+                            <input type="number" id="pork" min="0" value="50" step="10">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <div class="form-group">
+                            <label for="chicken">鸡肉 <span class="unit">克/天</span></label>
+                            <input type="number" id="chicken" min="0" value="50" step="10">
+                        </div>
+                        <div class="form-group">
+                            <label for="fish">鱼 <span class="unit">克/天</span></label>
+                            <input type="number" id="fish" min="0" value="30" step="10">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <div class="form-group">
+                            <label for="egg">蛋 <span class="unit">克/天</span></label>
+                            <input type="number" id="egg" min="0" value="50" step="10">
+                        </div>
+                        <div class="form-group">
+                            <label for="milk">牛奶 <span class="unit">毫升/天</span></label>
+                            <input type="number" id="milk" min="0" value="200" step="50">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <div class="form-group">
+                            <label for="vegetables">蔬菜 <span class="unit">克/天</span></label>
+                            <input type="number" id="vegetables" min="0" value="300" step="50">
+                        </div>
+                        <div class="form-group">
+                            <label for="rice">米饭/主食 <span class="unit">克/天</span></label>
+                            <input type="number" id="rice" min="0" value="400" step="50">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. 通勤排放 -->
+                <div class="section">
+                    <h2 class="section-title">工作日通勤</h2>
+                    <p class="tip">请选择您的主要通勤方式，并填写每天的单程距离</p>
+
+                    <div class="form-group">
+                        <label for="commuteMode">通勤方式</label>
+                        <select id="commuteMode">
+                            <option value="mtr">地铁 MTR</option>
+                            <option value="bus">巴士</option>
+                            <option value="minibus">小巴</option>
+                            <option value="tram">电车</option>
+                            <option value="taxi">的士</option>
+                            <option value="ferry">渡轮</option>
+                            <option value="walk">步行/骑车 (0排放)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <div class="form-group">
+                            <label for="commuteDistance">单程距离 <span class="unit">公里</span></label>
+                            <input type="number" id="commuteDistance" min="0" value="10" step="0.5">
+                        </div>
+                        <div class="form-group">
+                            <label for="workDays">每周工作天数</label>
+                            <input type="number" id="workDays" min="0" max="7" value="5">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. 周末出行 -->
+                <div class="section">
+                    <h2 class="section-title">周末休闲出行</h2>
+                    <p class="tip">请填写周末平均出行情况</p>
+
+                    <div class="form-group">
+                        <label for="weekendMode">周末出行方式</label>
+                        <select id="weekendMode">
+                            <option value="mtr">地铁 MTR</option>
+                            <option value="bus">巴士</option>
+                            <option value="taxi">的士</option>
+                            <option value="walk">主要在家/步行</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="weekendDistance">周末每次出行平均距离 <span class="unit">公里</span></label>
+                        <input type="number" id="weekendDistance" min="0" value="15" step="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="weekendTrips">每周末出行次数</label>
+                        <input type="number" id="weekendTrips" min="0" value="4" step="1">
+                    </div>
+                </div>
+
+                <!-- 4. 航空旅行 -->
+                <div class="section">
+                    <h2 class="section-title">航空旅行</h2>
+                    <p class="tip">请填写计算周期内的航空旅行情况</p>
+
+                    <div class="form-group">
+                        <label for="flightShort">短途航班（≤500公里）次数 <span class="unit">往返次数</span></label>
+                        <input type="number" id="flightShort" min="0" value="0" step="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="flightMedium">中途航班（500-1600公里）次数 <span class="unit">往返次数</span></label>
+                        <input type="number" id="flightMedium" min="0" value="0" step="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="flightLong">长途航班（≥1600公里）次数 <span class="unit">往返次数</span></label>
+                        <input type="number" id="flightLong" min="0" value="0" step="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="flightClass">舱位等级</label>
+                        <select id="flightClass">
+                            <option value="economy">经济舱</option>
+                            <option value="business">商务舱</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 5. 衣物购买 -->
+                <div class="section">
+                    <h2 class="section-title">衣物消费</h2>
+                    <p class="tip">请估算计算周期内购买的新衣物重量</p>
+
+                    <div class="form-group">
+                        <label for="clothingCotton">棉质衣物 <span class="unit">千克</span></label>
+                        <input type="number" id="clothingCotton" min="0" value="0" step="0.1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="clothingSynthetic">化纤/其他衣物 <span class="unit">千克</span></label>
+                        <input type="number" id="clothingSynthetic" min="0" value="0" step="0.1">
+                    </div>
+                </div>
+
+                <!-- 6. 家居用品 -->
+                <div class="section">
+                    <h2 class="section-title">家居用品</h2>
+                    <p class="tip">请填写计算周期内的消耗量</p>
+
+                    <div class="input-group">
+                        <div class="form-group">
+                            <label for="paper">纸张使用 <span class="unit">千克</span></label>
+                            <input type="number" id="paper" min="0" value="2" step="0.5">
+                        </div>
+                        <div class="form-group">
+                            <label for="plastic">塑料制品 <span class="unit">千克</span></label>
+                            <input type="number" id="plastic" min="0" value="1" step="0.1">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. 用水 -->
+                <div class="section">
+                    <h2 class="section-title">用水情况</h2>
+                    <p class="tip">请填写每天的用水量</p>
+
+                    <div class="input-group">
+                        <div class="form-group">
+                            <label for="showerTime">洗澡时间 <span class="unit">分钟/天</span></label>
+                            <input type="number" id="showerTime" min="0" value="10" step="1">
+                            <p class="tip">假设淋浴流量为10升/分钟</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="laundryFreq">洗衣频率 <span class="unit">次/周</span></label>
+                            <input type="number" id="laundryFreq" min="0" value="3" step="1">
+                            <p class="tip">假设每次用水约100升</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. 用电 -->
+                <div class="section">
+                    <h2 class="section-title">用电情况</h2>
+                    <p class="tip">请填写每月的用电量或每天的平均用电量</p>
+
+                    <div class="form-group">
+                        <label for="electricity">每月用电量 <span class="unit">千瓦时/月</span></label>
+                        <input type="number" id="electricity" min="0" value="300" step="10">
+                        <p class="tip">可从电费单中查看，或输入家庭总用电的个人占比</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="electricitySource">电力来源</label>
+                        <select id="electricitySource">
+                            <option value="CLP">中华电力 CLP</option>
+                            <option value="HEC">香港电灯 HEC</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-calculate">🧮 计算我的碳足迹</button>
+            </form>
+
+            <!-- 结果显示区域 -->
+            <div id="result" class="result">
+                <h2>📊 您的碳排放报告</h2>
+                <div class="total-emission">
+                    <span id="totalEmission">0</span> <span style="font-size: 24px;">千克 CO₂</span>
+                </div>
+                <p style="text-align: center; font-size: 18px; margin-bottom: 20px;">
+                    计算周期：<span id="resultPeriod"></span>
+                </p>
+
+                <div class="breakdown">
+                    <h3>📈 排放明细</h3>
+                    <div class="breakdown-item">
+                        <span>🍖 饮食排放</span>
+                        <span><strong id="foodEmission">0</strong> kg CO₂</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>🚇 通勤排放</span>
+                        <span><strong id="commuteEmission">0</strong> kg CO₂</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>🎡 周末出行排放</span>
+                        <span><strong id="weekendEmission">0</strong> kg CO₂</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>✈️ 航空排放</span>
+                        <span><strong id="flightEmission">0</strong> kg CO₂</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>👕 衣物排放</span>
+                        <span><strong id="clothingEmission">0</strong> kg CO₂</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>🏠 家居用品排放</span>
+                        <span><strong id="householdEmission">0</strong> kg CO₂</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>💧 用水排放</span>
+                        <span><strong id="waterEmission">0</strong> kg CO₂</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>⚡ 用电排放</span>
+                        <span><strong id="electricityEmission">0</strong> kg CO₂</span>
+                    </div>
+                </div>
+
+                <div class="comparison">
+                    <h3>🌳 相当于需要种植</h3>
+                    <div style="font-size: 36px; margin: 15px 0;">
+                        <strong id="treesNeeded">0</strong> 棵树
+                    </div>
+                    <p>才能吸收您在此周期内产生的碳排放</p>
+                    <p style="margin-top: 10px; font-size: 14px; opacity: 0.8;">
+                        （基于每棵5米高的树每年吸收23kg CO₂）
+                    </p>
+                </div>
+
+                <div class="comparison" style="margin-top: 15px;">
+                    <h3>💡 减排建议</h3>
+                    <div id="suggestions" style="text-align: left; padding: 15px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="carbon_calculator.js"></script>
+</body>
+</html>
